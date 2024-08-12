@@ -55,7 +55,7 @@ To build the WASM app instead, there are a few more setup steps.
 ### install the target architecture toolchain
 
 ```shell
-rustup target add asmjs-unknown-emscripten
+rustup target add wasm32-unknown-emscripten
 ```
 
 We use [emscripten](https://emscripten.org/) to convert Rust LLVM bytecode to WASM.
@@ -88,7 +88,7 @@ export EMCC_CFLAGS="-s USE_SDL=2"
 ### build
 
 ```shell
-cargo build --target asmjs-unknown-emscripten
+cargo build --target wasm32-unknown-emscripten
 ```
 
 Open the browser app with
