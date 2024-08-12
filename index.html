@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><title>Emscripten-Generated Code</title></head>
+
+<head>
+    <title>Emscripten-Generated Code</title>
+</head>
+
 <body>
 
-<!-- The Module.canvas is where Emscripten renders our Rust game. -->
-<canvas id="canvas"></canvas>
+    <!-- The Module.canvas is where Emscripten renders our Rust game. -->
+    <canvas id="canvas"></canvas>
 
-<script type="text/javascript">
-    // a "var" named "Module" is required by Emscripten
-    // see: https://emscripten.org/docs/api_reference/module.html
-    var Module = {canvas: document.getElementById('canvas')};
-</script>
-
-<!-- This is the code compiled by emscripten. -->
-<script type="text/javascript" src="target/asmjs-unknown-emscripten/debug/hello-rust-sdl2-wasm.js"></script>
+    <script type="text/javascript">
+        // a "var" named "Module" is required by Emscripten
+        // see: https://emscripten.org/docs/api_reference/module.html
+        var Module = { canvas: document.getElementById('canvas') };
+        fetch('target/wasm32-unknown-emscripten/debug/hello_rust_sdl2_wasm.wasm')
+            .then((response) => response.arrayBuffer())
+            .then((buffer) => {
+                Module.wasmBinary = buffer
+                var script = document.createElement('script')
+                script.src = "target/wasm32-unknown-emscripten/debug/hello-rust-sdl2-wasm.js"
+                document.body.appendChild(script)
+            })
+    </script>
 
 </body>
+
 </html>
