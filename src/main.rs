@@ -1,9 +1,11 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
+use std::process;
 
-use hello_rust_sdl2_wasm::main_loop;
+static BLACK: Color = Color::RGB(0, 0, 0);
+static WHITE: Color = Color::RGB(255, 255, 255);
 
 // Resources
 //     https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm
@@ -37,26 +39,68 @@ fn main() {
 
     let rect = Rect::new(0, 0, 10, 10);
 
-    let ctx = Rc::new(RefCell::new(ctx));
-    let rect = Rc::new(RefCell::new(rect));
-    let canvas = Rc::new(RefCell::new(canvas));
+    let ctx = ctx;
+    let mut rect = rect;
+    let mut canvas = canvas;
+    let mut events = ctx.event_pump().unwrap();
+
+    let mut callback = move || {
+        for event in events.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => {
+                    process::exit(1);
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::Left),
+                    ..
+                } => {
+                    rect.x -= 10;
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::Right),
+                    ..
+                } => {
+                    rect.x += 10;
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::Up),
+                    ..
+                } => {
+                    rect.y -= 10;
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::Down),
+                    ..
+                } => {
+                    rect.y += 10;
+                }
+                _ => {}
+            }
+        }
+
+        let _ = canvas.set_draw_color(BLACK);
+        let _ = canvas.clear();
+        let _ = canvas.set_draw_color(WHITE);
+        let _ = canvas.fill_rect(rect);
+        let _ = canvas.present();
+    };
 
     #[cfg(target_family = "wasm")]
     use hello_rust_sdl2_wasm::emscripten;
 
     #[cfg(target_family = "wasm")]
-    emscripten::set_main_loop_callback(main_loop(
-        Rc::clone(&ctx),
-        Rc::clone(&rect),
-        Rc::clone(&canvas),
-    ));
+    emscripten::set_main_loop_callback(callback);
 
     #[cfg(not(target_family = "wasm"))]
     {
         use std::thread::sleep;
         use std::time::Duration;
         loop {
-            main_loop(Rc::clone(&ctx), Rc::clone(&rect), Rc::clone(&canvas))();
+            callback();
             sleep(Duration::from_millis(10))
         }
     }
